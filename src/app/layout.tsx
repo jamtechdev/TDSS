@@ -1,0 +1,19 @@
+import type { Metadata } from "next";
+import "./globals.css";
+
+export const metadata: Metadata = {
+  title: "TDS — Traffic Distribution System",
+  description: "Internal campaign management and traffic distribution platform",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en" className="h-full antialiased dark">
+      <body className="min-h-full flex flex-col">{children}</body>
+    </html>
+  );
+}
