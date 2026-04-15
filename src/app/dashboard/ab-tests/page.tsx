@@ -32,10 +32,12 @@ export default function ABTestsPage() {
         <>
           {results.some(r => r.is_winner) && <div style={{ padding: 14, borderRadius: 12, background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}><span style={{ fontSize: 24 }}>🏆</span><div><p style={{ fontWeight: 600, color: "var(--color-amber)" }}>Winner: {(results.find(r => r.is_winner) as Record<string, unknown>)?.variant_name as string}</p><p style={{ fontSize: 11, color: "rgba(245,158,11,0.7)" }}>Best {type === "lander" ? "CTR" : "EPC"} performance</p></div></div>}
           <div style={{ display: "grid", gridTemplateColumns: `repeat(${Math.min(results.length, 3)}, 1fr)`, gap: 14, marginBottom: 16 }}>
-            {results.map(r => (
-              <div key={r.variant_id as string} style={{ ...card, border: (r.is_winner as boolean) ? "1px solid rgba(245,158,11,0.3)" : card.border, background: (r.is_winner as boolean) ? "rgba(245,158,11,0.04)" : card.background }}>
+            {results.map(r => {
+              const isWinner = r.is_winner === true;
+              return (
+              <div key={r.variant_id as string} style={{ ...card, border: isWinner ? "1px solid rgba(245,158,11,0.3)" : card.border, background: isWinner ? "rgba(245,158,11,0.04)" : card.background }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>{r.is_winner && <span>🏆</span>}<span style={{ fontWeight: 600 }}>{r.variant_name as string}</span></div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>{isWinner && <span>🏆</span>}<span style={{ fontWeight: 600 }}>{r.variant_name as string}</span></div>
                   <span style={{ fontSize: 10, color: "#8b93a6" }}>{r.confidence as number}%</span>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
@@ -44,7 +46,7 @@ export default function ABTestsPage() {
                   ))}
                 </div>
               </div>
-            ))}
+            )})}
           </div>
           {results.length === 0 && !loading && <div style={{ ...card, padding: 40, textAlign: "center", color: "#555d6f" }}>No {type} data available yet</div>}
         </>
