@@ -3,7 +3,7 @@ import React from "react";
 
 interface Column<T> { key: string; label: string; align?: "left" | "right"; render?: (val: unknown, row: T) => React.ReactNode; }
 
-export function DataTable<T extends Record<string, unknown>>({ columns, data, onRowClick, emptyMessage = "No data", loading = false }: {
+export function DataTable<T extends object>({ columns, data, onRowClick, emptyMessage = "No data", loading = false }: {
   columns: Column<T>[]; data: T[]; onRowClick?: (row: T) => void; emptyMessage?: string; loading?: boolean;
 }) {
   if (loading) return (
@@ -31,7 +31,7 @@ export function DataTable<T extends Record<string, unknown>>({ columns, data, on
                 onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = ""; }}>
                 {columns.map((c) => (
                   <td key={c.key} style={{ padding: "10px 14px", fontSize: 13, textAlign: c.align || "left", fontFamily: c.align === "right" ? "var(--font-mono)" : "inherit" }}>
-                    {c.render ? c.render(row[c.key], row) : String(row[c.key] ?? "-")}
+                    {c.render ? c.render((row as Record<string, unknown>)[c.key], row) : String((row as Record<string, unknown>)[c.key] ?? "-")}
                   </td>
                 ))}
               </tr>

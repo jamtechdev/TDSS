@@ -20,7 +20,17 @@ export default function NewCampaignPage() {
   const [landers, setLanders] = useState<VariantInput[]>([{ name: "Lander A", url: "", weight: 50 }, { name: "Lander B", url: "", weight: 50 }]);
   const [offers, setOffers] = useState<VariantInput[]>([{ name: "Offer A", url: "", weight: 50 }, { name: "Offer B", url: "", weight: 50 }]);
 
-  const updateV = (arr: VariantInput[], setArr: (v: VariantInput[]) => void, i: number, field: string, val: string | number) => { const u = [...arr]; (u[i] as Record<string, unknown>)[field] = val; setArr(u); };
+  const updateV = <K extends keyof VariantInput>(
+    arr: VariantInput[],
+    setArr: (v: VariantInput[]) => void,
+    i: number,
+    field: K,
+    val: VariantInput[K]
+  ) => {
+    const u = [...arr];
+    u[i][field] = val;
+    setArr(u);
+  };
   const addV = (arr: VariantInput[], setArr: (v: VariantInput[]) => void, prefix: string) => setArr([...arr, { name: `${prefix} ${String.fromCharCode(65 + arr.length)}`, url: "", weight: 0 }]);
   const removeV = (arr: VariantInput[], setArr: (v: VariantInput[]) => void, i: number) => { if (arr.length > 1) setArr(arr.filter((_, j) => j !== i)); };
 

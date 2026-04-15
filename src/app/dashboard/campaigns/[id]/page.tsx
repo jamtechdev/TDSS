@@ -40,7 +40,7 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
   const btnSec = { padding: "7px 14px", background: "var(--color-surface-3)", border: "1px solid var(--color-surface-4)", borderRadius: 8, color: "#e2e4e9", fontSize: 13, cursor: "pointer" as const, display: "inline-flex" as const, alignItems: "center" as const, gap: 6 };
 
   const abCols = [
-    { key: "variant_name", label: "Variant", render: (_: unknown, r: Record<string, unknown>) => (<div style={{ display: "flex", alignItems: "center", gap: 6 }}>{r.is_winner && <span>🏆</span>}<span style={{ fontWeight: r.is_winner ? 600 : 400, color: r.is_winner ? "var(--color-amber)" : "inherit" }}>{r.variant_name as string}</span></div>) },
+    { key: "variant_name", label: "Variant", render: (_: unknown, r: Record<string, unknown>) => { const isWinner = r.is_winner === true; return (<div style={{ display: "flex", alignItems: "center", gap: 6 }}>{isWinner && <span>🏆</span>}<span style={{ fontWeight: isWinner ? 600 : 400, color: isWinner ? "var(--color-amber)" : "inherit" }}>{r.variant_name as string}</span></div>); } },
     { key: "weight", label: "Weight", align: "right" as const, render: (v: unknown) => `${v}%` },
     { key: "visits", label: "Visits", align: "right" as const, render: (v: unknown) => (v as number).toLocaleString() },
     { key: "clicks", label: "Clicks", align: "right" as const, render: (v: unknown) => (v as number).toLocaleString() },

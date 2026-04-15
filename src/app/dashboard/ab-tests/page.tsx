@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import type { ReactNode } from "react";
 import { useFetch } from "@/hooks/useFetch";
 import { DataTable } from "@/components/ui/DataTable";
 import type { CampaignSummary } from "@/types";
@@ -41,7 +42,16 @@ export default function ABTestsPage() {
                   <span style={{ fontSize: 10, color: "#8b93a6" }}>{r.confidence as number}%</span>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                  {[["Visits", r.visits], ["Clicks", r.clicks], ["CTR", `${(r.ctr as number).toFixed(2)}%`], ["Conv.", r.conversions], ["CR", `${(r.cr as number).toFixed(2)}%`], ["EPC", `$${(r.epc as number).toFixed(2)}`], ["Revenue", <span key="rev" style={{ color: "var(--color-green)" }}>${(r.revenue as number).toFixed(2)}</span>], ["Profit", <span key="pft" style={{ color: (r.profit as number) >= 0 ? "var(--color-green)" : "var(--color-red)" }}>${(r.profit as number).toFixed(2)}</span>]].map(([label, val], j) => (
+                  {([
+                    ["Visits", r.visits],
+                    ["Clicks", r.clicks],
+                    ["CTR", `${(r.ctr as number).toFixed(2)}%`],
+                    ["Conv.", r.conversions],
+                    ["CR", `${(r.cr as number).toFixed(2)}%`],
+                    ["EPC", `$${(r.epc as number).toFixed(2)}`],
+                    ["Revenue", <span key="rev" style={{ color: "var(--color-green)" }}>${(r.revenue as number).toFixed(2)}</span>],
+                    ["Profit", <span key="pft" style={{ color: (r.profit as number) >= 0 ? "var(--color-green)" : "var(--color-red)" }}>${(r.profit as number).toFixed(2)}</span>],
+                  ] as Array<[string, number | string | ReactNode]>).map(([label, val], j) => (
                     <div key={j}><p style={{ fontSize: 9, color: "#555d6f", textTransform: "uppercase", letterSpacing: "0.06em" }}>{label as string}</p><p style={{ fontWeight: 700, fontFamily: "var(--font-mono)", fontSize: 14, marginTop: 2 }}>{typeof val === "number" ? val.toLocaleString() : val}</p></div>
                   ))}
                 </div>

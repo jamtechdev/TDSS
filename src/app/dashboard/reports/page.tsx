@@ -21,7 +21,17 @@ export default function ReportsPage() {
   qp.set("group_by", groupBy);
   const { data: kd, loading } = useFetch<{ kpis: Array<Record<string, unknown>> }>(`/api/kpi?${qp.toString()}`);
   const kpis = kd?.kpis || [];
-  const t = kpis.reduce((a, k) => ({ visits: a.visits + ((k.visits as number) || 0), clicks: a.clicks + ((k.clicks as number) || 0), conversions: a.conversions + ((k.conversions as number) || 0), revenue: a.revenue + ((k.revenue as number) || 0), cost: a.cost + ((k.cost as number) || 0), profit: a.profit + ((k.profit as number) || 0) }), { visits: 0, clicks: 0, conversions: 0, revenue: 0, cost: 0, profit: 0 });
+  const t = kpis.reduce<{ visits: number; clicks: number; conversions: number; revenue: number; cost: number; profit: number }>(
+    (a, k) => ({
+      visits: a.visits + ((k.visits as number) || 0),
+      clicks: a.clicks + ((k.clicks as number) || 0),
+      conversions: a.conversions + ((k.conversions as number) || 0),
+      revenue: a.revenue + ((k.revenue as number) || 0),
+      cost: a.cost + ((k.cost as number) || 0),
+      profit: a.profit + ((k.profit as number) || 0),
+    }),
+    { visits: 0, clicks: 0, conversions: 0, revenue: 0, cost: 0, profit: 0 }
+  );
 
   const columns = [
     { key: "key", label: groupBy.charAt(0).toUpperCase() + groupBy.slice(1), render: (v: unknown) => <span style={{ fontWeight: 500 }}>{(v as string) || "Unknown"}</span> },
