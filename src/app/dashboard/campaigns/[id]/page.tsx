@@ -13,9 +13,19 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
   const [copied, setCopied] = useState<string | null>(null);
   const [showScript, setShowScript] = useState(false);
   const [abType, setAbType] = useState<"lander" | "offer">("lander");
+  const [syncing, setSyncing] = useState(false);
+  const [syncedAt, setSyncedAt] = useState<string | null>(null);
 
   const { data, loading, refetch } = useFetch<{ campaign: Campaign; tracking_script: string; campaign_url: string }>(`/api/campaigns/${id}`);
-  const { data: abData, loading: abLoading } = useFetch<{ results: Array<Record<string, unknown>> }>(`/api/ab-test?campaign_id=${id}&type=${abType}`);
+  const { data: abData, loading: abLoading, refetch: refetchAb } = useFetch<{ results: Array<Record<string, unknown>> }>(`/api/ab-test?campaign_id=${id}&type=${abType}`);
+
+  const syncNow = async () => {
+    setSyncing(true);
+    try {
+      const res = await fetch("/api/cron/sync");
+      if (res.ok) { await refetchAb(); setSyncedAt(new Date().toLocaleTimeString()); }
+    } finally { setSyncing(false); }
+  };
 
   const campaign = data?.campaign;
   const script = data?.tracking_script || "";
@@ -62,7 +72,14 @@ export default function CampaignDetailPage({ params }: { params: Promise<{ id: s
             <div style={{ display: "flex", gap: 12, marginTop: 4, fontSize: 13, color: "#555d6f" }}><span style={{ fontFamily: "var(--font-mono)" }}>{campaign.slug}</span><span style={{ textTransform: "uppercase", fontSize: 11 }}>{campaign.traffic_source}</span></div>
           </div>
         </div>
-        <button onClick={toggle} style={btnSec}>{campaign.status === "active" ? "⏸ Pause" : "▶ Activate"}</button>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          {syncedAt && <span style={{ fontSize: 11, color: "#8b93a6" }}>Synced {syncedAt}</span>}
+          <button onClick={syncNow} disabled={syncing} style={{ ...btnSec, opacity: syncing ? 0.6 : 1, cursor: syncing ? "wait" : "pointer" }}>
+            <span className={syncing ? "tds-spin" : ""}>🔄</span>
+            {syncing ? "Syncing..." : "Sync Now"}
+          </button>
+          <button onClick={toggle} style={btnSec}>{campaign.status === "active" ? "⏸ Pause" : "▶ Activate"}</button>
+        </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>

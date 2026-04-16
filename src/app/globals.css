@@ -42,3 +42,6 @@ input:focus,select:focus,textarea:focus {
   border-color:var(--color-brand-600);box-shadow:0 0 0 2px rgba(26,108,245,.15);
 }
 input::placeholder { color: #555d6f; }
+
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.tds-spin { animation: spin 1s linear infinite; display: inline-block; }
