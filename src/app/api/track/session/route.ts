@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
 import { getClientIP, getGeoFromHeaders, detectDevice, detectBrowser, detectOS } from "@/lib/geo";
+import { selectLander } from "@/distribution";
+import type { Lander } from "@/types";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -23,8 +25,9 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     if (!body.campaign_slug) return jsonWithCors({ error: "campaign_slug required" }, { status: 400 });
-    const { data: campaign } = await supabase.from("campaigns").select("id").eq("slug", body.campaign_slug).eq("status", "active").single();
+    const { data: campaign } = await supabase.from("campaigns").select("id, landers(*)").eq("slug", body.campaign_slug).eq("status", "active").single();
     if (!campaign) return jsonWithCors({ error: "Campaign not found" }, { status: 404 });
+    const selectedLander = selectLander((campaign.landers || []) as Lander[]);
     const headers = request.headers;
     const ip = getClientIP(headers);
     const geo = getGeoFromHeaders(headers);
@@ -35,7 +38,8 @@ export async function POST(request: NextRequest) {
       if (existing) return jsonWithCors({ session_id: existing.id, cached: true });
     }
     const { data: session, error } = await supabase.from("sessions").insert({
-      campaign_id: campaign.id, visitor_id: body.visitor_id || null, ip_address: ip,
+      campaign_id: campaign.id, lander_id: selectedLander?.id || null,
+      visitor_id: body.visitor_id || null, ip_address: ip,
       country_code: geo.country_code || body.country_code || null, region: geo.region || null, city: geo.city || null,
       device: body.device || detectDevice(ua), browser: detectBrowser(ua), os: detectOS(ua),
       language: body.language || null, referrer: body.referrer || null, user_agent: ua,

@@ -33,20 +33,26 @@ export async function aggregateKPIs(dateFrom?: string, dateTo?: string) {
       const totalByDate = new Map<string, number>();
       for (const v of visits || []) { const d = v.created_at.split("T")[0]; totalByDate.set(d, (totalByDate.get(d) || 0) + 1); }
       for (const cost of costs || []) { const amt = parseFloat(cost.amount as string) || 0; const tv = totalByDate.get(cost.date) || 1; for (const [, b] of buckets) { if (b.date === cost.date) { b.cost += cost.country_code && b.country_code === cost.country_code ? amt : amt * (b.visits / tv); } } }
+      // Delete existing aggregates for this campaign+date range, then insert fresh
+      const bucketDates = new Set<string>();
+      for (const [, b] of buckets) bucketDates.add(b.date);
+      for (const d of bucketDates) {
+        await supabase.from("kpi_aggregates").delete().eq("campaign_id", campaign.id).eq("date", d);
+      }
       for (const [, b] of buckets) {
         const ctr = b.visits > 0 ? (b.clicks / b.visits) * 100 : 0;
         const cr = b.clicks > 0 ? (b.conversions / b.clicks) * 100 : 0;
         const roi = b.cost > 0 ? ((b.revenue - b.cost) / b.cost) * 100 : 0;
         const epc = b.clicks > 0 ? b.revenue / b.clicks : 0;
         const cpa = b.conversions > 0 ? b.cost / b.conversions : 0;
-        const { error } = await supabase.from("kpi_aggregates").upsert({
+        const { error } = await supabase.from("kpi_aggregates").insert({
           campaign_id: b.campaign_id, lander_id: b.lander_id, offer_id: b.offer_id, date: b.date,
           country_code: b.country_code, device: b.device, visits: b.visits, clicks: b.clicks,
           conversions: b.conversions, revenue: b.revenue, cost: Math.round(b.cost * 100) / 100,
           ctr: Math.round(ctr * 1e4) / 1e4, cr: Math.round(cr * 1e4) / 1e4, roi: Math.round(roi * 1e4) / 1e4,
           epc: Math.round(epc * 1e4) / 1e4, cpa: Math.round(cpa * 1e4) / 1e4, profit: Math.round((b.revenue - b.cost) * 100) / 100,
           computed_at: new Date().toISOString(),
-        }, { onConflict: "campaign_id,lander_id,offer_id,date,country_code,device" });
+        });
         if (error) errors.push(error.message); else computed++;
       }
     } catch (err) { errors.push(`${campaign.id}: ${(err as Error).message}`); }
